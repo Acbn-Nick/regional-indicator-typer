@@ -10,4 +10,5 @@ func main() {
 	log.Info("launching regional-indicator-typer")
 	c := client.New()
 	c.Start()
+	<-c.Done
 }

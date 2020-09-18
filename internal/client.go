@@ -79,7 +79,7 @@ func (c *Client) hooks() {
 			"🇼", "🇽", "🇾", "🇿",
 		}
 		aToE = make(map[string]string)
-		wk   = make([]win.KEYBD_INPUT, 4)
+		wk   = make([]win.KEYBD_INPUT, 6)
 	)
 
 	log.Info("starting hooks")
@@ -109,10 +109,34 @@ func (c *Client) hooks() {
 			}
 
 			r, ok := aToE[strings.ToLower(string(e.Keychar))]
-
 			if !ok {
 				return
 			}
+
+			wk[0] = win.KEYBD_INPUT{
+				Type: win.INPUT_KEYBOARD,
+				Ki: win.KEYBDINPUT{
+					WVk:         win.VK_BACK,
+					WScan:       0,
+					DwFlags:     0,
+					Time:        0,
+					DwExtraInfo: 0,
+				},
+			}
+
+			wk[1] = win.KEYBD_INPUT{
+				Type: win.INPUT_KEYBOARD,
+				Ki: win.KEYBDINPUT{
+					WVk:         win.VK_BACK,
+					WScan:       0,
+					DwFlags:     win.KEYEVENTF_KEYUP,
+					Time:        0,
+					DwExtraInfo: 0,
+				},
+			}
+
+			win.SendInput(2, unsafe.Pointer(&wk[0]), int32(unsafe.Sizeof(wk[0])))
+			//time.Sleep(50 * time.Millisecond)
 
 			ru := []rune(r)
 			r1, r2 := utf16.EncodeRune(ru[0])
@@ -161,9 +185,30 @@ func (c *Client) hooks() {
 				},
 			}
 
-			win.SendInput(4, unsafe.Pointer(&wk[0]), int32(unsafe.Sizeof(wk[0])))
-			time.Sleep(150 * time.Millisecond)
+			wk[4] = win.KEYBD_INPUT{
+				Type: win.INPUT_KEYBOARD,
+				Ki: win.KEYBDINPUT{
+					WVk:         0,
+					WScan:       0x200B,
+					DwFlags:     win.KEYEVENTF_UNICODE,
+					Time:        0,
+					DwExtraInfo: 0,
+				},
+			}
 
+			wk[5] = win.KEYBD_INPUT{
+				Type: win.INPUT_KEYBOARD,
+				Ki: win.KEYBDINPUT{
+					WVk:         0,
+					WScan:       0x200B,
+					DwFlags:     win.KEYEVENTF_UNICODE | win.KEYEVENTF_KEYUP,
+					Time:        0,
+					DwExtraInfo: 0,
+				},
+			}
+
+			win.SendInput(6, unsafe.Pointer(&wk[0]), int32(unsafe.Sizeof(wk[0])))
+			time.Sleep(100 * time.Millisecond)
 		})
 	}
 
